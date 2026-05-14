@@ -255,7 +255,10 @@
     <span class="order-total-label">Total</span>
     <span class="order-total-amt" id="sheet-total">R0.00</span>
   </div>
-  <button class="place-btn" id="place-btn" onclick="placeOrder()">Place order 🎉</button>
+  <div style="background:var(--peach);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;font-size:13px;color:#8A5A3A;text-align:center;">
+    💵 Pay in person at the stall when your order is ready
+  </div>
+  <button class="place-btn" id="place-btn" onclick="placeOrder()">Send order 📨</button>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
@@ -268,8 +271,6 @@ import { getDatabase, ref, onValue, push, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 // ▼▼▼ REPLACE THIS WITH YOUR FIREBASE CONFIG ▼▼▼
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAYV2KcY5opolSrD-q02RIQNG1zLWrwboM",
   authDomain: "nelique-s.firebaseapp.com",
@@ -448,7 +449,7 @@ window.placeOrder = async function() {
     const ss = document.getElementById("success-screen");
     ss.classList.add("show");
     document.getElementById("success-sub").textContent =
-      `Thanks ${name}! Your order is on its way 🍃`;
+      `Thanks ${name}! Come to the stall to pay and collect when it's ready 💵`;
     cart = {};
   } catch(e) {
     btn.disabled = false;

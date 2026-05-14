@@ -159,14 +159,14 @@
     </div>
     <div class="stat-card">
       <div class="stat-val" id="stat-revenue" style="color:var(--teal)">R0</div>
-      <div class="stat-label">Today</div>
+      <div class="stat-label">Collected</div>
     </div>
   </div>
   <div class="filters">
     <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
     <button class="filter-btn" onclick="setFilter('new', this)">🆕 New</button>
     <button class="filter-btn" onclick="setFilter('ready', this)">⏳ Ready</button>
-    <button class="filter-btn" onclick="setFilter('done', this)">✅ Done</button>
+    <button class="filter-btn" onclick="setFilter('done', this)">💵 Paid</button>
   </div>
   <div class="orders-list" id="orders-list">
     <div class="empty-state"><div class="empty-emoji">⏳</div>Waiting for orders...</div>
@@ -189,8 +189,6 @@ import { getDatabase, ref, onValue, update, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 // ▼▼▼ REPLACE THIS WITH YOUR FIREBASE CONFIG ▼▼▼
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyAYV2KcY5opolSrD-q02RIQNG1zLWrwboM",
   authDomain: "nelique-s.firebaseapp.com",
@@ -262,8 +260,8 @@ function renderOrders() {
     ).join("");
     const notesHtml = o.notes ? `<div class="order-notes">📝 ${o.notes}</div>` : '';
     const actionBtns = (() => {
-      if (o.status === 'new')   return `<button class="s-btn btn-ready" onclick="setStatus('${key}','ready')">⏳ Ready</button><button class="s-btn btn-done" onclick="setStatus('${key}','done')">✅ Done</button><button class="s-btn btn-cancel" onclick="setStatus('${key}','cancelled')">✕</button>`;
-      if (o.status === 'ready') return `<button class="s-btn btn-done" onclick="setStatus('${key}','done')">✅ Done</button><button class="s-btn btn-cancel" onclick="setStatus('${key}','cancelled')">✕</button>`;
+      if (o.status === 'new')   return `<button class="s-btn btn-ready" onclick="setStatus('${key}','ready')">⏳ Ready</button><button class="s-btn btn-done" onclick="setStatus('${key}','done')">💵 Paid</button><button class="s-btn btn-cancel" onclick="setStatus('${key}','cancelled')">✕</button>`;
+      if (o.status === 'ready') return `<button class="s-btn btn-done" onclick="setStatus('${key}','done')">💵 Paid</button><button class="s-btn btn-cancel" onclick="setStatus('${key}','cancelled')">✕</button>`;
       return '';
     })();
 
