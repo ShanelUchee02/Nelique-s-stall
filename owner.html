@@ -159,7 +159,6 @@ import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.0/fireb
 import { getDatabase, ref, onValue, update }
                           from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-// ▼▼▼ PASTE YOUR FIREBASE CONFIG HERE ▼▼▼
 const firebaseConfig = {
   apiKey: "AIzaSyAYV2KcY5opolSrD-q02RIQNG1zLWrwboM",
   authDomain: "nelique-s.firebaseapp.com",
@@ -170,22 +169,28 @@ const firebaseConfig = {
   appId: "1:339346873659:web:53bbfac994f73035b4ab1e",
   measurementId: "G-HQM25RSFLB"
 };
-// ▲▲▲ PASTE YOUR FIREBASE CONFIG HERE ▲▲▲
 
 // ── Menu items — keep in sync with customer.html ─────────
 const MENU = [
-  { id:1,  name:"Classic Bubble Waffle", emoji:"🧇", price:55, category:"Bubble Waffles" },
-  { id:2,  name:"Berry Bubble Waffle",   emoji:"🍓", price:65, category:"Bubble Waffles" },
-  { id:3,  name:"Choc Bubble Waffle",    emoji:"🍫", price:65, category:"Bubble Waffles" },
-  { id:4,  name:"Loaded Bubble Waffle",  emoji:"🎉", price:85, category:"Bubble Waffles" },
-  { id:5,  name:"Classic Bubble Boba",   emoji:"🧋", price:55, category:"Bubble Boba" },
-  { id:6,  name:"Mango Boba",            emoji:"🥭", price:60, category:"Bubble Boba" },
-  { id:7,  name:"Strawberry Boba",       emoji:"🍓", price:60, category:"Bubble Boba" },
-  { id:8,  name:"Taro Boba",             emoji:"🫧", price:65, category:"Bubble Boba" },
-  { id:9,  name:"Oreo Frappe",           emoji:"🍪", price:55, category:"Frappes & Ice Cream" },
-  { id:10, name:"Caramel Frappe",        emoji:"🍮", price:55, category:"Frappes & Ice Cream" },
-  { id:11, name:"Soft Serve Cone",       emoji:"🍦", price:30, category:"Frappes & Ice Cream" },
-  { id:12, name:"Ice Cream Cup",         emoji:"🍨", price:40, category:"Frappes & Ice Cream" },
+  { id:1,  name:"Smartie Waffle",        emoji:"🧇", price:45, category:"Waffles",    desc:"Crispy bubble waffle topped with colourful Smarties & chocolate drizzle" },
+  { id:2,  name:"Oreo Waffle",           emoji:"🧇", price:45, category:"Waffles",    desc:"Bubble waffle loaded with crushed Oreos & cream" },
+  { id:3,  name:"Banana & Nuts Waffle",  emoji:"🧇", price:45, category:"Waffles",    desc:"Fresh banana slices, crunchy nuts & honey drizzle" },
+  { id:4,  name:"Chocolate Waffle",      emoji:"🧇", price:45, category:"Waffles",    desc:"Rich chocolate sauce smothered over a golden bubble waffle" },
+  { id:5,  name:"Plain Waffle",          emoji:"🧇", price:45, category:"Waffles",    desc:"Classic golden bubble waffle — simple & delicious" },
+  { id:6,  name:"Special Waffle",        emoji:"🧇", price:45, category:"Waffles",    desc:"Chef's special loaded waffle — ask us what's on today!" },
+  { id:7,  name:"Waffle Pizza",          emoji:"🧇", price:45, category:"Waffles",    desc:"Savoury bubble waffle base with pizza toppings" },
+  { id:8,  name:"Mini Marshmallows",     emoji:"🥞", price:30, category:"Pancakes",   desc:"Fluffy mini pancakes topped with soft marshmallows & syrup" },
+  { id:9,  name:"Smartie Mini's",        emoji:"🥞", price:30, category:"Pancakes",   desc:"Mini pancakes covered in colourful Smarties" },
+  { id:10, name:"Choc-Chip Mini's",      emoji:"🥞", price:30, category:"Pancakes",   desc:"Mini pancakes packed with melty chocolate chips" },
+  { id:11, name:"Mini Oreo's",           emoji:"🥞", price:30, category:"Pancakes",   desc:"Mini pancakes with crushed Oreos & cream drizzle" },
+  { id:12, name:"Caramel Cup",           emoji:"🍦", price:30, category:"Ice Cream",  desc:"Soft serve ice cream with smooth caramel sauce" },
+  { id:13, name:"Oreo Cup",              emoji:"🍦", price:30, category:"Ice Cream",  desc:"Soft serve topped with crushed Oreos" },
+  { id:14, name:"Plain Cone",            emoji:"🍦", price:30, category:"Ice Cream",  desc:"Classic soft serve cone — smooth & creamy" },
+  { id:15, name:"Candy Floss Boba",      emoji:"🧋", price:55, category:"Bubble Tea", desc:"Sweet candy floss flavour with tapioca pearls" },
+  { id:16, name:"Strawberry Boba",       emoji:"🧋", price:55, category:"Bubble Tea", desc:"Fruity strawberry milk tea with chewy pearls" },
+  { id:17, name:"Passion Fruit Boba",    emoji:"🧋", price:55, category:"Bubble Tea", desc:"Tangy passion fruit tea with tapioca pearls" },
+  { id:18, name:"Peppermint Boba",       emoji:"🧋", price:55, category:"Bubble Tea", desc:"Cool peppermint tea with chewy tapioca pearls" },
+  { id:19, name:"Frappe",                emoji:"🥤", price:50, category:"Frappes",    desc:"Thick blended frappe — ask us for today's flavour!" },
 ];
 
 const app = initializeApp(firebaseConfig);
@@ -296,9 +301,10 @@ window.switchTab = (tab,btn) => {
 // ── Stock grid ────────────────────────────────────────────
 function renderStockGrid() {
   const cats = [...new Set(MENU.map(i=>i.category))];
+  const catEmoji = {"Waffles":"🧇","Pancakes":"🥞","Ice Cream":"🍦","Bubble Tea":"🧋","Frappes":"🥤"};
   document.getElementById("stock-grid").innerHTML = cats.map(cat => {
     const items = MENU.filter(i=>i.category===cat);
-    return `<div class="stock-section-title">${cat}</div>
+    return `<div class="stock-section-title">${catEmoji[cat]||"🍴"} ${cat}</div>
       ${items.map(item => {
         const s = stockLevels[item.id]??20;
         const badgeStyle = s===0?'background:#FCEBEB;color:#A32D2D':s<=5?'background:#FAEEDA;color:#92400e':'background:#EAF3DE;color:#166534';

@@ -43,6 +43,15 @@
   .item-qty-badge{position:absolute;top:8px;right:8px;background:var(--navy);color:var(--yellow);font-size:12px;font-weight:800;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(0.7);transition:opacity .2s,transform .2s;}
   .item-card.in-cart .item-qty-badge{opacity:1;transform:scale(1);}
 
+  /* Yellow border strip under header */
+  .menu-border-strip{height:5px;background:linear-gradient(90deg,var(--navy),var(--yellow),var(--navy));width:100%;}
+
+  /* Centered card layout with image */
+  .item-card{text-align:center;}
+  .item-img-wrap{width:80px;height:80px;border-radius:14px;overflow:hidden;margin:0 auto 8px;border:2.5px solid var(--yellow);background:var(--yellow-light);display:flex;align-items:center;justify-content:center;}
+  .item-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+  .item-img-placeholder{font-size:36px;line-height:1;}
+
   /* Cart bar */
   .cart-bar{position:fixed;bottom:0;left:0;right:0;padding:1rem;background:var(--cream);border-top:2.5px solid var(--yellow);z-index:20;}
   .cart-btn{width:100%;padding:1rem;background:var(--yellow);color:var(--navy);border:none;border-radius:var(--radius);font-family:'Fredoka One',cursive;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 18px rgba(255,215,0,.5);transition:background .15s;}
@@ -131,7 +140,7 @@
 
 <!-- Menu -->
 <div id="main-content" class="main-content">
-  <div class="sprinkles">🧇🥞🍦🧋🥤</div>
+  <div class="menu-border-strip"></div>
   <div id="menu-container"><div class="loading">Loading menu...</div></div>
 </div>
 
@@ -245,6 +254,38 @@ let cart = {}, stockData = {}, activeOrderKey = null, unsub = null;
 // ── Stock listener ────────────────────────────────────────
 onValue(ref(db,"stock"), snap => { stockData = snap.val()||{}; renderMenu(); });
 
+// ── Item images (Unsplash free-to-use food photos) ───────
+// Replace any URL with your own photo to customise
+// 💡 TIP: Replace any URL below with a photo of your own item!
+//    Upload to Google Drive / WhatsApp yourself the image, host on imgur.com (free),
+//    then paste the direct image link here.
+const ITEM_IMAGES = {
+  // Waffles — bubble waffle photos
+  1:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
+  2:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
+  3:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
+  4:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
+  5:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
+  6:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
+  7:  "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&q=80", // pizza waffle
+  // Pancakes
+  8:  "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=300&q=80",
+  9:  "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=300&q=80",
+  10: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=300&q=80",
+  11: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=300&q=80",
+  // Ice Cream
+  12: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=300&q=80",
+  13: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=300&q=80",
+  14: "https://images.unsplash.com/photo-1567206563064-6f60f40a2b57?w=300&q=80",
+  // Bubble Tea
+  15: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80",
+  16: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80",
+  17: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80",
+  18: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80",
+  // Frappes
+  19: "https://images.unsplash.com/photo-1541614101331-1a5a3a194e92?w=300&q=80",
+};
+
 // ── Render menu ───────────────────────────────────────────
 function renderMenu() {
   const cats = [...new Set(MENU.map(i=>i.category))];
@@ -255,8 +296,13 @@ function renderMenu() {
       <div class="item-grid">
         ${MENU.filter(i=>i.category===cat).map(item => {
           const stock = stockData[item.id]??99, qty = cart[item.id]||0;
+          const imgSrc = ITEM_IMAGES[item.id];
           return `<div class="item-card ${qty>0?'in-cart':''} ${stock===0?'out':''}" id="card-${item.id}" onclick="toggleItem(${item.id})">
-            <span class="item-emoji">${item.emoji}</span>
+            <div class="item-img-wrap">
+              ${imgSrc
+                ? `<img src="${imgSrc}" alt="${item.name}" loading="lazy"/>`
+                : `<span class="item-img-placeholder">${item.emoji}</span>`}
+            </div>
             <div class="item-name">${item.name}</div>
             ${item.desc ? `<div class="item-desc">${item.desc}</div>` : ''}
             <div class="item-price">R${item.price.toFixed(2)}</div>
