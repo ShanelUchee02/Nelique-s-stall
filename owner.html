@@ -95,6 +95,18 @@
   .sc-input:focus{border-color:var(--yellow);}
   .save-stock-btn{background:var(--navy);color:var(--yellow);border:none;border-radius:999px;padding:10px 18px;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer;width:100%;margin-top:1.5rem;}
   .save-stock-btn:hover{background:var(--navy-dark);}
+
+  /* Archive & clear */
+  .clear-btn{background:var(--yellow-light);color:var(--navy);border:2px solid var(--yellow);border-radius:999px;padding:7px 16px;font-size:12px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:background .15s;}
+  .clear-btn:hover{background:var(--yellow);}
+  .archive-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .archive-info{font-size:13px;color:var(--text-muted);font-weight:600;}
+  .archive-summary{background:var(--white);border-radius:var(--radius);padding:1rem 1.25rem;box-shadow:var(--shadow);margin-bottom:1rem;display:flex;gap:1.5rem;flex-wrap:wrap;border-bottom:3px solid var(--yellow);}
+  .arch-stat{text-align:center;}
+  .arch-stat-val{font-family:'Fredoka One',cursive;font-size:22px;color:var(--navy);}
+  .arch-stat-label{font-size:11px;font-weight:700;color:var(--text-muted);}
+  .archive-date-group{margin-bottom:1.25rem;}
+  .archive-date-label{font-family:'Fredoka One',cursive;font-size:15px;color:var(--navy);background:var(--yellow-light);border-left:4px solid var(--yellow);padding:5px 12px;border-radius:0 8px 8px 0;margin-bottom:8px;display:inline-block;}
 </style>
 </head>
 <body>
@@ -110,6 +122,7 @@
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('orders',this)">Orders</button>
       <button class="tab-btn" onclick="switchTab('stock',this)">Stock</button>
+      <button class="tab-btn" onclick="switchTab('archive',this)">📦 Archive</button>
     </div>
   </div>
 </header>
@@ -140,6 +153,9 @@
     <button class="filter-btn" onclick="setFilter('ready',this)">⏳ Ready</button>
     <button class="filter-btn" onclick="setFilter('paid',this)">💵 Paid</button>
   </div>
+  <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+    <button class="clear-btn" onclick="archiveOrders()">📦 Archive &amp; clear today's orders</button>
+  </div>
   <div class="orders-list" id="orders-list">
     <div class="empty-state"><div class="empty-emoji">⏳</div>Waiting for orders...</div>
   </div>
@@ -151,12 +167,23 @@
   <button class="save-stock-btn" onclick="saveStock()">Save stock levels</button>
 </div>
 
+<!-- Archive pane -->
+<div class="pane" id="pane-archive">
+  <div class="archive-toolbar">
+    <div class="archive-info">Past orders moved here at end of day</div>
+  </div>
+  <div id="archive-stats" class="archive-summary"></div>
+  <div class="orders-list" id="archive-list">
+    <div class="empty-state"><div class="empty-emoji">📦</div>No archived orders yet.</div>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════
      FIREBASE CONFIG — same config as customer.html
      ══════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue, update }
+import { getDatabase, ref, onValue, update, set, get, remove }
                           from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
@@ -341,6 +368,102 @@ window.saveStock = () => {
     setTimeout(()=>{ btn.textContent="Save stock levels"; btn.style.background=""; },2000);
   });
 };
+
+// ── Archive orders ────────────────────────────────────────
+// Moves all current orders into /archive/YYYY-MM-DD/ and clears /orders
+window.archiveOrders = async () => {
+  const keys = Object.keys(allOrders);
+  if (!keys.length) { alert("No orders to archive."); return; }
+
+  const confirmed = confirm(
+    `Archive all ${keys.length} orders and clear the dashboard?\n\nThey will be saved under the Archive tab.`
+  );
+  if (!confirmed) return;
+
+  // Group by date
+  const today = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+  const archiveUpdates = {};
+
+  keys.forEach(key => {
+    archiveUpdates[`archive/${today}/${key}`] = allOrders[key];
+    archiveUpdates[`orders/${key}`] = null; // delete from live orders
+  });
+
+  await update(ref(db), archiveUpdates);
+
+  // Switch to archive tab to show result
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('[onclick*="archive"]').classList.add('active');
+  switchTab('archive', document.querySelector('[onclick*="archive"]'));
+};
+
+// ── Archive data ──────────────────────────────────────────
+let archiveData = {};
+onValue(ref(db,"archive"), snap => {
+  archiveData = snap.val() || {};
+  renderArchive();
+});
+
+function renderArchive() {
+  const list = document.getElementById("archive-list");
+  const statsEl = document.getElementById("archive-stats");
+  const dates = Object.keys(archiveData).sort().reverse(); // newest first
+
+  if (!dates.length) {
+    statsEl.innerHTML = "";
+    list.innerHTML = '<div class="empty-state"><div class="empty-emoji">📦</div>No archived orders yet.</div>';
+    return;
+  }
+
+  // Overall totals across all archive
+  let totalOrders = 0, totalRevenue = 0;
+  dates.forEach(date => {
+    Object.values(archiveData[date]).forEach(o => {
+      totalOrders++;
+      if (o.status==='paid') totalRevenue += (o.total||0);
+    });
+  });
+
+  statsEl.innerHTML = `
+    <div class="arch-stat"><div class="arch-stat-val">${totalOrders}</div><div class="arch-stat-label">Total Orders</div></div>
+    <div class="arch-stat"><div class="arch-stat-val">R${totalRevenue.toFixed(0)}</div><div class="arch-stat-label">Total Collected</div></div>
+    <div class="arch-stat"><div class="arch-stat-val">${dates.length}</div><div class="arch-stat-label">Days</div></div>`;
+
+  list.innerHTML = dates.map(date => {
+    const dayOrders = Object.entries(archiveData[date]);
+    const dayRevenue = dayOrders.filter(([,o])=>o.status==='paid').reduce((s,[,o])=>s+(o.total||0),0);
+    const dayCount = dayOrders.length;
+
+    // Format date nicely
+    const d = new Date(date+"T00:00:00");
+    const label = d.toLocaleDateString('en-ZA',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+    const orderCards = dayOrders.reverse().map(([key,o],idx) => {
+      const time = o.timestamp ? new Date(o.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+      const itemLines = (o.items||[]).map(i=>
+        `<div class="order-item-line"><span>${i.emoji}</span><span>${i.name} ×${i.qty}</span><span style="margin-left:auto">R${(i.price*i.qty).toFixed(2)}</span></div>`
+      ).join("");
+      const statusColour = {paid:'var(--green)',pending:'var(--navy)',ready:'var(--amber)',cancelled:'#ccc'}[o.status]||'var(--navy)';
+      return `<div class="order-card" style="border-left-color:${statusColour};opacity:${o.status==='cancelled'?.4:1}">
+        <div class="order-header">
+          <div><div class="order-name">${o.customer||'Customer'}</div><div class="order-time">${time}</div></div>
+          <span class="order-num">#${dayCount-idx}</span>
+        </div>
+        <div class="order-items-list">${itemLines}</div>
+        ${o.notes?`<div class="order-notes">📝 ${o.notes}</div>`:''}
+        <div class="order-footer">
+          <div class="order-total">R${(o.total||0).toFixed(2)}</div>
+          <span class="status-pill pill-${o.status||'pending'}">${{pending:'🆕 Pending',ready:'⏳ Ready',paid:'💵 Paid',cancelled:'✕ Cancelled'}[o.status]||o.status}</span>
+        </div>
+      </div>`;
+    }).join("");
+
+    return `<div class="archive-date-group">
+      <div class="archive-date-label">📅 ${label} — ${dayCount} orders · R${dayRevenue.toFixed(0)} collected</div>
+      ${orderCards}
+    </div>`;
+  }).join("");
+}
 </script>
 </body>
 </html>

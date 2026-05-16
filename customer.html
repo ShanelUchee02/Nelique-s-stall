@@ -43,8 +43,8 @@
   .item-qty-badge{position:absolute;top:8px;right:8px;background:var(--navy);color:var(--yellow);font-size:12px;font-weight:800;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(0.7);transition:opacity .2s,transform .2s;}
   .item-card.in-cart .item-qty-badge{opacity:1;transform:scale(1);}
 
-  /* Yellow border strip under header */
-  .menu-border-strip{height:5px;background:linear-gradient(90deg,var(--navy),var(--yellow),var(--navy));width:100%;}
+  /* Yellow border strip under header — matches owner dashboard */
+  .menu-border-strip{height:3px;background:var(--yellow);width:100%;}
 
   /* Centered card layout with image */
   .item-card{text-align:center;}
@@ -261,29 +261,29 @@ onValue(ref(db,"stock"), snap => { stockData = snap.val()||{}; renderMenu(); });
 //    then paste the direct image link here.
 const ITEM_IMAGES = {
   // Waffles — bubble waffle photos
-  1:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
-  2:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
-  3:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
-  4:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
-  5:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
-  6:  "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=300&q=80",
-  7:  "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=300&q=80", // pizza waffle
+  1:  "images/waffle.JPG",
+  2:  "images/waffle.JPG",
+  3:  "images/waffle.JPG",
+  4:  "images/waffle.JPG",
+  5:  "images/waffle.JPG",
+  6:  "images/waffle.JPG",
+  7:  "images/waffle_pizza.JPG", // pizza waffle
   // Pancakes
-  8:  "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=300&q=80",
-  9:  "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=300&q=80",
-  10: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=300&q=80",
-  11: "https://images.unsplash.com/photo-1528207776546-365bb710ee93?w=300&q=80",
+  8:  "images/berry_mini.JPG",
+  9:  "images/choc_mini.JPG",
+  10: "images/berry_mini.JPG",
+  11: "images/choc_mini.JPG",
   // Ice Cream
-  12: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=300&q=80",
-  13: "https://images.unsplash.com/photo-1497034825429-c343d7c6a68f?w=300&q=80",
-  14: "https://images.unsplash.com/photo-1567206563064-6f60f40a2b57?w=300&q=80",
+  12: "images/caramel_cup.JPG",
+  13: "images/oreo_cup.JPG",
+  14: "images/plain_cone.JPG",
   // Bubble Tea
-  15: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80",
-  16: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80",
-  17: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80",
-  18: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&q=80",
+  15: "images/boba.JPG",
+  16: "images/boba.JPG",
+  17: "images/boba.JPG",
+  18: "images/boba.JPG",
   // Frappes
-  19: "https://images.unsplash.com/photo-1541614101331-1a5a3a194e92?w=300&q=80",
+  19: "images/boba.JPG",
 };
 
 // ── Render menu ───────────────────────────────────────────
